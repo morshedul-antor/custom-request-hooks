@@ -3,7 +3,6 @@ const api = import.meta.env.VITE_API_URL
 
 export const useRequest = () => {
     // for get method
-    const [data, setData] = useState([])
     const [isLoading, setLoading] = useState(true)
 
     // for post, patch, put and delete
@@ -12,7 +11,7 @@ export const useRequest = () => {
     const [isSuccess, setSuccess] = useState(false)
 
     // handle get request
-    const handleFetch = async (endPoint, token) => {
+    const handleFetch = async (endPoint, token, setData) => {
         setLoading(true)
 
         try {
@@ -89,5 +88,5 @@ export const useRequest = () => {
         }
     }
 
-    return { handleFetch, handleSubmit, handleDelete, data, log, isLoading, isSuccess, isError }
+    return { handleFetch, handleSubmit, handleDelete, log, isLoading, isSuccess, isError }
 }

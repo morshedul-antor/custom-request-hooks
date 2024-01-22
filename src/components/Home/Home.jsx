@@ -5,16 +5,31 @@ export default function Home() {
     const token =
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImV4cCI6MTcwNjA3MjQzM30._6x-UILvBTfDx0N-V-u0Ai4c8s36QhsM_OaYkkJynrs'
 
-    const { handleFetch, handleSubmit, data, isLoading, log, isSuccess, isError } = useRequest()
+    const { handleFetch, handleSubmit, isLoading, log, isSuccess, isError } = useRequest()
 
     const [name, setName] = useState('')
     const [identifier, setIdentifier] = useState('')
     const [password, setPassword] = useState('')
 
+    const [services, setServices] = useState([])
+    const [doctors, setDoctors] = useState([])
+
     useEffect(() => {
-        handleFetch(`/service/filter?customer_name=${name}&skip=0&limit=10`, token)
+        handleFetch(`/service/filter?customer_name=${name}&skip=0&limit=10`, token, (data) => {
+            setServices(data)
+        })
     }, [name])
 
+    useEffect(() => {
+        handleFetch(`/admin/doctors/active`, null, (data) => {
+            setDoctors(data)
+        })
+    }, [])
+
+    console.log('s', services)
+    console.log('d', doctors)
+
+    // post
     const handleLogin = async (e) => {
         e.preventDefault()
 
@@ -40,20 +55,44 @@ export default function Home() {
 
     return (
         <div style={{ textAlign: 'center' }}>
-            <h1>Home!</h1>
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Search name..." />
-            <br />
-            {isLoading ? (
-                'Loading...'
-            ) : (
-                <>
-                    <h2>Data: {data && data[0].results}</h2>
-                    {data[1] && data[1]?.map((d, i) => <p key={i}>{d?.ServiceOrder?.service_name}</p>)}
-                </>
-            )}
+            <h1>Home</h1>
 
-            <br />
-            <br />
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 200, height: 350 }}>
+                <div>
+                    <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Search name..."
+                    />
+                    <br />
+                    {isLoading === false ? (
+                        <>
+                            <h2>Data: {services && services[0]?.results}</h2>
+                            {services[1] && services[1]?.map((d, i) => <p key={i}>{d?.ServiceOrder?.service_name}</p>)}
+                        </>
+                    ) : (
+                        <p>Loading...</p>
+                    )}
+
+                    <br />
+                    <br />
+                </div>
+
+                <div>
+                    {isLoading === false ? (
+                        <>
+                            <h2>Doctor: {doctors && doctors[0]?.results}</h2>
+                            {doctors[1] && doctors[1]?.map((d, i) => <p key={i}>{d?.User?.name}</p>)}
+                        </>
+                    ) : (
+                        <p>Loading...</p>
+                    )}
+
+                    <br />
+                    <br />
+                </div>
+            </div>
 
             <form onSubmit={handleLogin}>
                 <input

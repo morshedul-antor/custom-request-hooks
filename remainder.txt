@@ -1,59 +1,145 @@
-######## API Methods ########
+##################### API Methods #####################
+
+## Custom API Request Hook
+import {useRequest} from './hooks/useRequest'
+const {handleFetch, handleSubmit, handleDelete} = useRequest()
 
 ### GET ####
 useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch(
-                    `${apiV1}/`,
-                    {
-                        method: 'GET',
-                        headers: {
-                            Accept: 'application/json',
-                            'Content-Type': 'application/json',
-                            Authorization: `Bearer ${token}`,
-                        },
-                    }
-                )
+    setLoadingState(true)
 
-                const data = await response.json()
+    const fetch = async () => {
+        const { data, isLoading, isSuccess } = await handleFetch(`endpoint`, token)
+        setState(data)
+        setLoadingState(isLoading)
+    }
+    fetch()
+}, [])
 
-                if (response.ok) {
-                   console.log('success')
-                }
-            } catch (e) {
-                console.log('error:', e)
-            }
-        }
-        fetchData()
+useEffect(() => {
+    setLoadingState(true)
+
+    handleFetch(`endpoint`, token)
+    .then((res) => {
+        setState(res.data)
+        setLoadingState(res.loading)
+    })
 }, [])
 
 
-### POST ####
-const handleSubmit = async () => {
-        const details = {
-           //
-        }
+### POST, PATCH, PUT ####
+const handleOnSubmit = async (e) => {
+    e.preventDefault()
 
+    const details = {
+        //
+    }
+
+    const { log, isSuccess, isError } = await handleSubmit(`endpoint`, details, token, method)
+
+    if (isSuccess) {
+        console.log('success:', log)
+    } else {
+        console.log('error:', isError)
+    }
+}
+
+
+### DELETE ####
+const handleOnDelete = async () => {
+    const { log, isSuccess, isError } = await handleDelete(`endpoint`, token)
+
+    if (isSuccess) {
+        console.log('success:', log)
+    } else {
+        console.log('error:', isError)
+    }
+}
+
+
+
+********** API Methods - Async Await ***************
+
+### GET ####
+useEffect(() => {
+    const fetch = async () => {
         try {
-            const response = await fetch(`${apiV1}/`, {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify(details),
-            })
+            const response = await fetch(
+                `${api}/`,
+                {
+                    method: 'GET',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            )
 
-            const log  = await response.json()
+            const data = await response.json()
 
             if (response.ok) {
                 console.log('success')
-            } else {
-                alert(log.context + '!')
             }
         } catch (e) {
-                console.log('error:', e)
+            console.log('error:', e)
         }
+    }
+    fetch()
+}, [])
+
+
+### POST, PATCH, PUT ####
+const handleSubmit = async (e) => {
+    e.preventDefault()
+
+    const details = {
+        //
+    }
+
+    try {
+        const response = await fetch(`${api}/`, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(details),
+        })
+
+        const log  = await response.json()
+
+        if (response.ok) {
+            console.log('success', log)
+        } else {
+            alert(log.context + '!')
+        }
+    } catch (e) {
+            console.log('error:', e)
+    }
+}
+
+
+### DELETE ####
+const handleDelete = async () => {
+    try {
+        const response = await fetch(`${api}/`, {
+            method: 'DELETE',
+            headers: {
+                Accept: 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+        })
+
+        const log  = await response.json()
+
+        if (response.ok) {
+            console.log('success', log)
+        } else {
+            alert(log.context + '!')
+        }
+    } catch (e) {
+            console.log('error:', e)
+    }
 }

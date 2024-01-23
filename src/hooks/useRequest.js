@@ -1,21 +1,17 @@
-import { useState } from 'react'
 const api = import.meta.env.VITE_API_URL
 
 export const useRequest = () => {
-    // for post, patch, put and delete
-    const [log, setLog] = useState({})
-    const [isError, setError] = useState(false)
-    const [isSuccess, setSuccess] = useState(false)
-
     // handle get request
-    const handleFetch = async (endPoint, setData, setLoading, token) => {
-        setLoading(true)
+    const handleFetch = async (endPoint, token) => {
+        let data = []
+        let isSuccess = false
+        let isLoading = true
 
         try {
             const response = await fetch(api + endPoint, {
                 method: 'GET',
                 headers: {
-                    accept: 'application/json',
+                    Accept: 'application/json',
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
                 },
@@ -23,25 +19,26 @@ export const useRequest = () => {
             const data = await response.json()
 
             if (response.ok) {
-                setLoading(false)
-                setData(data)
+                isSuccess = true
+                isLoading = false
+                return { data, isSuccess, isLoading }
             }
         } catch (e) {
-            // eslint-disable-next-line no-console
-            console.log('error:', e)
+            return { data, isSuccess, isLoading }
         }
     }
 
     // handle post(default), patch and put request
     const handleSubmit = async (endPoint, body, token, method = 'POST') => {
-        setError(false)
-        setSuccess(false)
+        let log = []
+        let isSuccess = false
+        let isError = false
 
         try {
             const response = await fetch(api + endPoint, {
                 method: method,
                 headers: {
-                    accept: 'application/json',
+                    Accept: 'application/json',
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
                 },
@@ -50,40 +47,46 @@ export const useRequest = () => {
             const log = await response.json()
 
             if (response.ok) {
-                setLog(log)
-                setSuccess(true)
+                isSuccess = true
+                return { log, isSuccess, isError }
             } else {
-                setError(log.context)
+                isError = log.context
+                return { log, isSuccess, isError }
             }
         } catch (e) {
-            setError(e)
+            isError = e
+            return { log, isSuccess, isError }
         }
     }
 
     // handle delete request
     const handleDelete = async (endPoint, token) => {
-        setError(false)
-        setSuccess(false)
+        let log = []
+        let isSuccess = false
+        let isError = false
 
         try {
             const response = await fetch(api + endPoint, {
                 method: 'DELETE',
                 headers: {
-                    accept: 'application/json',
+                    Accept: 'application/json',
                     Authorization: `Bearer ${token}`,
                 },
             })
             const log = await response.json()
 
             if (response.ok) {
-                setSuccess(true)
+                isSuccess = true
+                return { log, isSuccess, isError }
             } else {
-                setError(log.context)
+                isError = log.context
+                return { log, isSuccess, isError }
             }
         } catch (e) {
-            setError(e)
+            isError = e
+            return { log, isSuccess, isError }
         }
     }
 
-    return { handleFetch, handleSubmit, handleDelete, log, isSuccess, isError }
+    return { handleFetch, handleSubmit, handleDelete }
 }

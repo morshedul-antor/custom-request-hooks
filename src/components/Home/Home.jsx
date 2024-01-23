@@ -5,7 +5,7 @@ export default function Home() {
     const token =
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImV4cCI6MTcwNjA3MjQzM30._6x-UILvBTfDx0N-V-u0Ai4c8s36QhsM_OaYkkJynrs'
 
-    const { handleFetch, handleSubmit, log, isSuccess, isError } = useRequest()
+    const { handleFetch, handleSubmit } = useRequest()
 
     const [name, setName] = useState('')
     const [identifier, setIdentifier] = useState('')
@@ -18,27 +18,35 @@ export default function Home() {
     const [isLoadingDoctor, setLoadingDoctor] = useState(true)
 
     useEffect(() => {
-        handleFetch(
-            `/service/filter?customer_name=${name}&skip=0&limit=10`,
-            (data) => {
-                setServices(data)
-            },
-            (loading) => {
-                setLoadingService(loading)
-            },
-            token,
-        )
+        setLoadingService(true)
+        const fetch = async () => {
+            const { data, isLoading } = await handleFetch(
+                `/service/filter?customer_name=${name}&skip=0&limit=10`,
+                token,
+            )
+            setServices(data)
+            setLoadingService(isLoading)
+        }
+        fetch()
     }, [name])
 
     useEffect(() => {
-        handleFetch(
-            `/admin/doctors/active`,
-            (data) => {
-                setDoctors(data)
-            },
-            (loading) => setLoadingDoctor(loading),
-        )
+        setLoadingService(true)
+        const fetch = async () => {
+            const { data, isLoading } = await handleFetch(`/admin/doctors/active`, token)
+            setDoctors(data)
+            setLoadingDoctor(isLoading)
+        }
+        fetch()
     }, [])
+
+    // useEffect(() => {
+    //     setLoadingService(true)
+    //     handleFetch(`/service/filter?customer_name=${name}&skip=0&limit=10`, token).then((res) => {
+    //         setServices(res.data)
+    //         setLoadingService(res.loading)
+    //     })
+    // }, [name])
 
     // post
     const handleLogin = async (e) => {
@@ -49,18 +57,14 @@ export default function Home() {
             password,
         }
 
-        await handleSubmit(`/login`, details)
-    }
+        const { log, isSuccess, isError } = await handleSubmit(`/login`, details)
 
-    useEffect(() => {
-        if (isSuccess || isError) {
-            if (isSuccess) {
-                console.log(log)
-            } else {
-                console.log('error:', isError)
-            }
+        if (isSuccess) {
+            console.log('success:', log)
+        } else {
+            console.log('error:', isError)
         }
-    }, [isSuccess, isError, log])
+    }
 
     // }
 

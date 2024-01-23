@@ -5,29 +5,40 @@ export default function Home() {
     const token =
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImV4cCI6MTcwNjA3MjQzM30._6x-UILvBTfDx0N-V-u0Ai4c8s36QhsM_OaYkkJynrs'
 
-    const { handleFetch, handleSubmit, isLoading, log, isSuccess, isError } = useRequest()
+    const { handleFetch, handleSubmit, log, isSuccess, isError } = useRequest()
 
     const [name, setName] = useState('')
     const [identifier, setIdentifier] = useState('')
     const [password, setPassword] = useState('')
 
     const [services, setServices] = useState([])
+    const [isLoadingService, setLoadingService] = useState(true)
+
     const [doctors, setDoctors] = useState([])
+    const [isLoadingDoctor, setLoadingDoctor] = useState(true)
 
     useEffect(() => {
-        handleFetch(`/service/filter?customer_name=${name}&skip=0&limit=10`, token, (data) => {
-            setServices(data)
-        })
+        handleFetch(
+            `/service/filter?customer_name=${name}&skip=0&limit=10`,
+            (data) => {
+                setServices(data)
+            },
+            (loading) => {
+                setLoadingService(loading)
+            },
+            token,
+        )
     }, [name])
 
     useEffect(() => {
-        handleFetch(`/admin/doctors/active`, null, (data) => {
-            setDoctors(data)
-        })
+        handleFetch(
+            `/admin/doctors/active`,
+            (data) => {
+                setDoctors(data)
+            },
+            (loading) => setLoadingDoctor(loading),
+        )
     }, [])
-
-    console.log('s', services)
-    console.log('d', doctors)
 
     // post
     const handleLogin = async (e) => {
@@ -66,13 +77,13 @@ export default function Home() {
                         placeholder="Search name..."
                     />
                     <br />
-                    {isLoading === false ? (
+                    {isLoadingService ? (
+                        <p>Loading...</p>
+                    ) : (
                         <>
                             <h2>Data: {services && services[0]?.results}</h2>
                             {services[1] && services[1]?.map((d, i) => <p key={i}>{d?.ServiceOrder?.service_name}</p>)}
                         </>
-                    ) : (
-                        <p>Loading...</p>
                     )}
 
                     <br />
@@ -80,13 +91,14 @@ export default function Home() {
                 </div>
 
                 <div>
-                    {isLoading === false ? (
+                    <br />
+                    {isLoadingDoctor ? (
+                        <p>Loading...</p>
+                    ) : (
                         <>
                             <h2>Doctor: {doctors && doctors[0]?.results}</h2>
                             {doctors[1] && doctors[1]?.map((d, i) => <p key={i}>{d?.User?.name}</p>)}
                         </>
-                    ) : (
-                        <p>Loading...</p>
                     )}
 
                     <br />

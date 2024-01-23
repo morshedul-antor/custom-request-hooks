@@ -32,21 +32,12 @@ export default function Home() {
 
     useEffect(() => {
         setLoadingService(true)
-        const fetch = async () => {
-            const { data, isLoading } = await handleFetch(`/admin/doctors/active`, token)
-            setDoctors(data)
-            setLoadingDoctor(isLoading)
-        }
-        fetch()
-    }, [])
 
-    // useEffect(() => {
-    //     setLoadingService(true)
-    //     handleFetch(`/service/filter?customer_name=${name}&skip=0&limit=10`, token).then((res) => {
-    //         setServices(res.data)
-    //         setLoadingService(res.loading)
-    //     })
-    // }, [name])
+        handleFetch(`/admin/doctors/active`, token).then((res) => {
+            setDoctors(res.data)
+            setLoadingDoctor(res.isLoading)
+        })
+    }, [])
 
     // post
     const handleLogin = async (e) => {
